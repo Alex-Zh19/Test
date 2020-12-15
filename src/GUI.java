@@ -1,11 +1,12 @@
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -135,7 +136,7 @@ public class GUI extends JFrame {
             if (fileChooser.showSaveDialog(GUI.this) == JFileChooser.APPROVE_OPTION) {
                 File folder = fileChooser.getSelectedFile();
 
-                SaveToFile(folder);
+                SaveToFile(folder,AcceptUser());
             }
             else{
                 JOptionPane.showMessageDialog(GUI.this, "Сохранение отменено");
@@ -143,11 +144,63 @@ public class GUI extends JFrame {
         }
     };
 
-    private void SaveToFile(File selectedDir) {
-        LAST_FOLDER_USED=selectedDir.getAbsolutePath();
-        try {
-            
 
+    private String CreateStringToWriter(User user){
+        String allData="";
+        Integer id=user.GetId();
+        allData+=id.toString();
+        allData+=" ";
+        if(user.GetName()!="isEmpty"){
+            allData+=user.GetName();
+            allData+=" ";
+        }
+        if(user.GetSurname()!="isEmpty"){
+            allData+=user.GetSurname();
+            allData+=" ";
+        }
+        if(user.GetEmail()!="isEmpty"){
+            allData+=user.GetEmail();
+            allData+=" ";
+        }
+        if(user.GetPhoneNumber1()!="isEmpty"){
+            allData+=user.GetPhoneNumber1();
+            allData+=" ";
+        }
+        if(user.GetPhoneNumber2()!="isEmpty"){
+            allData+=user.GetPhoneNumber2();
+            allData+=" ";
+        }
+        if(user.GetPhoneNumber3()!="isEmpty"){
+            allData+=user.GetPhoneNumber3();
+            allData+=" ";
+        }
+        if(user.GetRole1()!="isEmpty"){
+            allData+=user.GetRole1();
+            allData+=" ";
+        }
+        if(user.GetRole2()!="isEmpty"){
+            allData+=user.GetRole2();
+            allData+=" ";
+        }
+        if(user.GetRole3()!="isEmpty"){
+            allData+=user.GetRole3();
+            allData+=" ";
+        }
+        return allData;
+    }
+
+
+
+    private void SaveToFile(File selectedDir,User user) {
+        LAST_FOLDER_USED=selectedDir.getAbsolutePath();
+        Date NameOfFile = new Date();
+        SimpleDateFormat FormatOfDate_Name = new SimpleDateFormat("yyyyMMddHHmmss");
+        String name = FormatOfDate_Name.format(NameOfFile) + ".txt";
+        File file=new File(LAST_FOLDER_USED+'/'+name);
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+            writer.write(CreateStringToWriter(user));
+            writer.close();
         } catch (IOException exception) {
             JOptionPane.showMessageDialog(GUI.this, "Ошибка сохранения");
 
@@ -327,12 +380,16 @@ private void SetUserToFields(User user){
     class ApplyButtonListener implements ActionListener{
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-            isAllowedToEditAndDelete=false;
-            if(base.Edit(saveId,AcceptUser())){
-                System.out.println("Changes accepted");
-            }
-            else{
-                System.out.println("Changes not accepted ");;
+            if(isAllowedToEditAndDelete) {
+                isAllowedToEditAndDelete = false;
+                if (base.Edit(saveId, AcceptUser())) {
+                    System.out.println("Changes accepted");
+                } else {
+                    System.out.println("Changes not accepted ");
+                    ;
+                }
+            }else{
+                System.out.println("Select user");
             }
         }
     }
@@ -349,6 +406,8 @@ private void SetUserToFields(User user){
             else{
                 System.out.println("deleting failed");
             }
+            }else{
+                System.out.println("Select user");
             }
         }
     }
@@ -361,6 +420,7 @@ private void SetUserToFields(User user){
             pack();
         }
     }
+
 
     class ShowButtonListener implements ActionListener{
         @Override

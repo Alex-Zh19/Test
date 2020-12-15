@@ -6,7 +6,7 @@ public class Database implements IDatabase {
     final String IS_EMPTY="isEmpty";
 @Override
     public boolean Add(User user){
-        if(CheckUniqueEmail(user)&&CheckUniquePhoneNum1(user)&&
+        if(!UserIsEmpty(user)&&CheckUniqueEmail(user)&&CheckUniquePhoneNum1(user)&&
         CheckUniquePhoneNum2(user)&&CheckUniquePhoneNum3(user)&&
                 CheckEmail(user.GetEmail())&&CheckPhoneNumber(user.GetPhoneNumber1())&&
                 CheckPhoneNumber(user.GetPhoneNumber2())&&CheckPhoneNumber(user.GetPhoneNumber3())){
@@ -125,7 +125,7 @@ public class Database implements IDatabase {
         if(database.size()==0){
             return true;
         }
-        if(user.GetEmail()!=IS_EMPTY)  {
+        if(user.GetEmail()!=IS_EMPTY){
             for(int i=0;i<database.size();++i){
                 if(i==id){
                     continue;
@@ -141,8 +141,8 @@ public class Database implements IDatabase {
         if(database.size()==0){
             return true;
         }
-        if(user.GetPhoneNumber1()!=IS_EMPTY) {
-            for (int i = 0; i < database.size(); ++i) {
+        if(user.GetPhoneNumber1()!=IS_EMPTY){
+            for (int i = 0;i<database.size();++i){
                 if(i==id){
                     continue;
                 }
@@ -399,9 +399,11 @@ private ArrayList<User>CheckRoles(ArrayList<User>Similar,User user){
             int dot=dataEmail.indexOf('.');
             if(dot>dogy+1&&dogy!=0&&dot!=0&&dogy!=dataEmail.length()-1&&dot!=dataEmail.length()-1){
                 return true;
+            }else{
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
 
