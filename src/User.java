@@ -8,10 +8,15 @@ public class User {
     private String phoneNumber1=null;
     private String phoneNumber2=null;
     private String phoneNumber3=null;
+    private int ID;
 
-    public void SetName(String name){
-        this.name=name;
+
+    public void SetID(int id){this.ID=id;}
+    public int GetId(){
+        return ID;
     }
+
+    public void SetName(String name){ this.name=name; }
     public String GetName(){
         return name;
     }
@@ -22,7 +27,7 @@ public class User {
         return surname;
     }
     public void SetEmail(String email){
-        this.email=email;
+    this.email=email;
     }
     public String GetEmail(){
         return email;
@@ -39,15 +44,11 @@ public class User {
     public String GetRole2(){
         return role2;
     }
-    public void SetRole3(String role3){
-        this.role3=role3;
-    }
+    public void SetRole3(String role3){ this.role3=role3; }
     public String GetRole3(){
         return role3;
     }
-    public void SetPhoneNumber1(String phoneNumber1){
-        this.phoneNumber1=phoneNumber1;
-    }
+    public void SetPhoneNumber1(String phoneNumber1){this.phoneNumber1=phoneNumber1;}
     public String GetPhoneNumber1(){
         return phoneNumber1;
     }
@@ -64,5 +65,36 @@ public class User {
         return phoneNumber3;
     }
 
+    public void println(){
+       System.out.print(ID+" ");
+       if(name!="isEmpty"){
+           System.out.print(name+" ");
+       }
+        if(surname!="isEmpty"){
+            System.out.print(surname+" ");
+        }
+        if(email!="isEmpty"){
+            System.out.print(email+" ");
+        }
+        if(phoneNumber1!="isEmpty"){
+            System.out.print(phoneNumber1+" ");
+        }
+        if(phoneNumber2!="isEmpty"){
+            System.out.print(phoneNumber2+" ");
+        }
+        if(phoneNumber3!="isEmpty"){
+            System.out.print(phoneNumber3+" ");
+        }
+        if(role1!="isEmpty"){
+            System.out.print(role1+" ");
+        }
+        if(role2!="isEmpty"){
+            System.out.print(role2+" ");
+        }
+        if(role3!="isEmpty"){
+            System.out.print(role3+" ");
+        }
+        System.out.println();
 
+    }
 }

@@ -1,5 +1,11 @@
+import java.util.ArrayList;
+
 public interface IDatabase {
-     void Add(User user);
+     boolean Add(User user);
      User GetWithId(int ID);
-     void Get(User user);
+     ArrayList<User> Get(User user);
+     boolean Edit(int id,User User);
+     void Show();
+     boolean Delete(int id);
+
 }
