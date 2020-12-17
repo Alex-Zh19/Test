@@ -1,20 +1,27 @@
+import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Scanner;
 
 public class Database implements IDatabase {
-    ArrayList<User>database=new ArrayList<>();
+    private String LAST_FOLDER_USED = "LAST_FOLDER_USED";
 
+    ArrayList<User>database=new ArrayList<>();
+    boolean isOpen=false;
+    String openFileName="openFileName";
     final String IS_EMPTY="isEmpty";
 @Override
     public boolean Add(User user){
-        if(!UserIsEmpty(user)&&CheckUniqueEmail(user)&&CheckUniquePhoneNum1(user)&&
+    if(!UserFieldsIsEmpty(user)&&CheckUniqueEmail(user)&&CheckUniquePhoneNum1(user)&&
         CheckUniquePhoneNum2(user)&&CheckUniquePhoneNum3(user)&&
                 CheckEmail(user.GetEmail())&&CheckPhoneNumber(user.GetPhoneNumber1())&&
                 CheckPhoneNumber(user.GetPhoneNumber2())&&CheckPhoneNumber(user.GetPhoneNumber3())){
             user.SetID(database.size());
             database.add(user);
-        return true;
+         return true;
         }
-        return false;
+         return false;
     }
 @Override
     public User GetWithId(int ID){
@@ -28,7 +35,8 @@ public class Database implements IDatabase {
 
     @Override
     public boolean Edit(int id,User user){
-        if(CheckUniqueEmail(user,id)&&CheckUniquePhoneNum1(user,id)&&
+        if(!UserFieldsIsEmpty(user)&&
+                CheckUniqueEmail(user,id)&&CheckUniquePhoneNum1(user,id)&&
                 CheckUniquePhoneNum2(user,id)&&CheckUniquePhoneNum3(user,id)&&
                 CheckEmail(user.GetEmail())&&CheckPhoneNumber(user.GetPhoneNumber1())&&
                 CheckPhoneNumber(user.GetPhoneNumber2())&&CheckPhoneNumber(user.GetPhoneNumber3())){
@@ -68,30 +76,174 @@ public class Database implements IDatabase {
     }
 
 
+
+
+
+@Override
+    public boolean SaveToFile(File selectedDir) {
+        LAST_FOLDER_USED=selectedDir.getAbsolutePath();
+    String name;
+    File file;
+        if(!isOpen){
+        Date NameOfFile = new Date();
+        SimpleDateFormat FormatOfDate_Name = new SimpleDateFormat("yyyyMMddHHmmss");
+        name = FormatOfDate_Name.format(NameOfFile) + ".txt";
+        file =new File(LAST_FOLDER_USED+'/'+name);
+        }
+        else{
+            name = openFileName;
+            file =new File(name);
+            isOpen=false;
+        }
+
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+            for(User us:database){
+            writer.write(CreateStringToWriter(us));
+            writer.write('\n');
+            }
+            writer.close();
+        } catch (IOException exception) {
+            System.out.println("saving error");
+           return false;
+        }
+        return true;
+    }
+
+@Override
+    public boolean ReadFromFile(File selectedFile){
+    try {
+        openFileName=selectedFile.getAbsolutePath();
+        isOpen=true;
+        FileReader reader = new FileReader(selectedFile);
+        Scanner scan = new Scanner(reader);
+        ArrayList<String> data=new ArrayList<>();
+        while(scan.hasNextLine()){
+            data.add(scan.nextLine());
+        }
+        database.clear();
+for(String str:data){
+    Add(SplitStringToCreateUser(str));
+}
+
+    }catch (IOException e){
+        System.out.println("Opening error");
+        return false;
+    }
+    return true;
+    }
+
+    private User SplitStringToCreateUser(String str){
+    User user=new User();
+    String[]strings=str.split(" ");
+    int h=1;
+    user.SetName(strings[h]);
+    h++;
+    user.SetSurname(strings[h]);
+    h++;
+    if(CheckEmail(strings[h])){
+        user.SetEmail(strings[h]);
+        ++h;
+    }
+    if(CheckPhoneNumber(strings[h])){
+        user.SetPhoneNumber1(strings[h]);
+        ++h;
+    }
+    if(CheckPhoneNumber(strings[h])){
+            user.SetPhoneNumber2(strings[h]);
+            ++h;
+    }else{
+        user.SetPhoneNumber2(IS_EMPTY);
+    }
+    if(CheckPhoneNumber(strings[h])){
+            user.SetPhoneNumber3(strings[h]);
+            ++h;
+    }
+    else{
+        user.SetPhoneNumber3(IS_EMPTY);
+    }
+    user.SetRole1(strings[h]);
+    if(h!=strings.length-1){
+        ++h;
+        user.SetRole2(strings[h]);
+
+        if(h!=strings.length-1){
+            ++h;
+            user.SetRole3(strings[h]);
+        }else{
+            user.SetRole3(IS_EMPTY);
+        }
+    }
+    else{
+        user.SetRole2(IS_EMPTY);
+        user.SetRole3(IS_EMPTY);
+    }
+    return user;
+    }
+
+    public String getLAST_FOLDER_USED() {
+        return LAST_FOLDER_USED;
+    }
+
+    public void setLAST_FOLDER_USED(String path){
+        LAST_FOLDER_USED=path;
+    }
+
+    private String CreateStringToWriter(User user){
+        String allData="";
+        Integer id=user.GetId();
+        allData+=id.toString();
+        allData+=" ";
+            allData+=user.GetName();
+            allData+=" ";
+            allData+=user.GetSurname();
+            allData+=" ";
+            allData+=user.GetEmail();
+            allData+=" ";
+            allData+=user.GetPhoneNumber1();
+            allData+=" ";
+            if(user.GetPhoneNumber2()!=IS_EMPTY){
+            allData+=user.GetPhoneNumber2();
+            allData+=" ";}
+        if(user.GetPhoneNumber3()!=IS_EMPTY){
+            allData+=user.GetPhoneNumber3();
+            allData+=" ";}
+            allData+=user.GetRole1();
+            allData+=" ";
+        if(user.GetRole2()!=IS_EMPTY) {
+            allData += user.GetRole2();
+            allData += " ";
+        }
+        if(user.GetRole3()!=IS_EMPTY){
+            allData+=user.GetRole3();
+            allData+=" ";
+        }
+        return allData;
+    }
+
+
     private boolean CheckUniqueEmail(User user){
     if(database.size()==0){
         return true;
     }
-    if(user.GetEmail()!=IS_EMPTY)  {
     for(int i=0;i<database.size();++i){
         if(user.GetEmail().equals(database.get(i).GetEmail())){
           return false;
         }
       }
-    }
+
       return true;
 }
     private boolean CheckUniquePhoneNum1(User user){
         if(database.size()==0){
             return true;
         }
-       if(user.GetPhoneNumber1()!=IS_EMPTY) {
            for (int i = 0; i < database.size(); ++i) {
                if (user.GetPhoneNumber1().equals(database.get(i).GetPhoneNumber1())) {
                    return false;
                }
            }
-       }
+
         return true;
     }
     private boolean CheckUniquePhoneNum2(User user){
@@ -111,9 +263,9 @@ public class Database implements IDatabase {
         if(database.size()==0){
             return true;
         }
-        if(user.GetPhoneNumber3()!=IS_EMPTY){
-            for(int i=0;i<database.size();++i){
-                if(user.GetPhoneNumber3().equals(database.get(i).GetPhoneNumber3())){
+        if(user.GetPhoneNumber2()!=IS_EMPTY) {
+            for (int i = 0; i < database.size(); ++i) {
+                if (user.GetPhoneNumber3().equals(database.get(i).GetPhoneNumber3())) {
                     return false;
                 }
             }
@@ -125,7 +277,6 @@ public class Database implements IDatabase {
         if(database.size()==0){
             return true;
         }
-        if(user.GetEmail()!=IS_EMPTY){
             for(int i=0;i<database.size();++i){
                 if(i==id){
                     continue;
@@ -134,14 +285,13 @@ public class Database implements IDatabase {
                     return false;
                 }
             }
-        }
+
         return true;
     }
     private boolean CheckUniquePhoneNum1(User user,int id){
         if(database.size()==0){
             return true;
         }
-        if(user.GetPhoneNumber1()!=IS_EMPTY){
             for (int i = 0;i<database.size();++i){
                 if(i==id){
                     continue;
@@ -150,7 +300,6 @@ public class Database implements IDatabase {
                     return false;
                 }
             }
-        }
         return true;
     }
     private boolean CheckUniquePhoneNum2(User user,int id){
@@ -186,16 +335,22 @@ public class Database implements IDatabase {
         return true;
     }
 
-    private boolean UserIsEmpty(User user){
-        if(user.GetName()==IS_EMPTY&&user.GetSurname()==IS_EMPTY&&user.GetEmail()==IS_EMPTY&&user.GetRole1()==IS_EMPTY
-                &&user.GetRole2()==IS_EMPTY&&user.GetRole3()==IS_EMPTY&&
-                user.GetPhoneNumber1()==IS_EMPTY&&user.GetPhoneNumber2()==IS_EMPTY&&
-                user.GetPhoneNumber3()==IS_EMPTY){
+    private boolean UserFieldsIsEmpty(User user){
+        if(user.GetName()==IS_EMPTY||user.GetSurname()==IS_EMPTY||user.GetEmail()==IS_EMPTY||user.GetRole1()==IS_EMPTY||
+                user.GetPhoneNumber1()==IS_EMPTY){
             return true;
         }
         return false;
     }
 
+    private boolean UserIsEmpty(User user){
+        if(user.GetName()==IS_EMPTY&&user.GetSurname()==IS_EMPTY&&user.GetEmail()==IS_EMPTY&&user.GetRole1()==IS_EMPTY
+                && user.GetPhoneNumber1()==IS_EMPTY&&user.GetRole2()==IS_EMPTY&&user.GetRole3()==IS_EMPTY
+              &&user.GetPhoneNumber2()==IS_EMPTY&&user.GetPhoneNumber3()==IS_EMPTY){
+            return true;
+        }
+        return false;
+    }
     private ArrayList<User> FindMostSimilar(ArrayList<User> database,User user){
         if(database.size()==0){
             return null;
@@ -393,6 +548,7 @@ private ArrayList<User>CheckRoles(ArrayList<User>Similar,User user){
         }
        return true;
     }
+
     private boolean CheckEmail(String dataEmail){
         if(dataEmail!=IS_EMPTY){
             int dogy=dataEmail.indexOf('@');

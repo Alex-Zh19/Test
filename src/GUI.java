@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 
 public class GUI extends JFrame {
     private JTextField name=new JTextField();
@@ -33,13 +35,15 @@ public class GUI extends JFrame {
     private JButton plustelButton=new JButton("Add telephone");
     private JButton showButton=new JButton("Show all");
 
-    private String LAST_FOLDER_USED = "LAST_FOLDER_USED";
 
 
     private JMenuItem saveMenuItem;
+    private JMenuItem openMenuItem;
 
     private JCheckBox findID=new JCheckBox();
     IDatabase base=new Database();
+
+    boolean isOpen=false;
 
     private Box dopfields=Box.createVerticalBox();
 
@@ -50,6 +54,8 @@ public class GUI extends JFrame {
     private int countRole=2;
     GUI(){
         setTitle("Users");
+
+
 
        Box TextBox=Box.createVerticalBox();
        TextBox.add(Box.createVerticalStrut(5));
@@ -114,98 +120,117 @@ public class GUI extends JFrame {
         menu.add(fileMenu);
         
         saveMenuItem = fileMenu.add(saveAction);
+        openMenuItem=fileMenu.add(openAction);
 
        add(TextBox, BorderLayout.WEST);
        add(ButtonPlusBox,BorderLayout.EAST);
        add(dopfields,BorderLayout.CENTER);
        add(mainButtonBox,BorderLayout.SOUTH);
        pack();
+
    }
 
 
+    CompletableFuture <IDatabase> addDefaultUsersAsync =CompletableFuture.supplyAsync(() -> {
+        addDefaultUsers();
+        return base;
+    });
+
+ private void addDefaultUsers(){
+       User user1=new User();
+       user1.SetName("Anton");
+       user1.SetSurname("Petrov");
+       user1.SetEmail("Anton@mail.ru");
+       user1.SetPhoneNumber1("375445587896");
+     user1.SetPhoneNumber2("isEmpty");
+     user1.SetPhoneNumber3("isEmpty");
+       user1.SetRole1("boss");
+     user1.SetRole2("isEmpty");
+     user1.SetRole3("isEmpty");
+       base.Add(user1);
+     User user2=new User();
+     user2.SetName("Marat");
+     user2.SetSurname("Popov");
+     user2.SetEmail("Popov@mail.ru");
+     user2.SetPhoneNumber1("375298574896");
+     user2.SetPhoneNumber2("isEmpty");
+     user2.SetPhoneNumber3("isEmpty");
+     user2.SetRole1("Developer");
+     user2.SetRole2("isEmpty");
+     user2.SetRole3("isEmpty");
+     base.Add(user2);
+     User user3=new User();
+     user3.SetName("Alex");
+     user3.SetSurname("Lubov");
+     user3.SetEmail("LubovA@mail.ru");
+     user3.SetPhoneNumber1("375446542918");
+     user3.SetPhoneNumber2("isEmpty");
+     user3.SetPhoneNumber3("isEmpty");
+     user3.SetRole1("Trainee");
+     user3.SetRole2("isEmpty");
+     user3.SetRole3("isEmpty");
+     base.Add(user3);
+ }
 
 
     Action saveAction = new AbstractAction("Сохранить") {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
+           if(!isOpen){
             JFileChooser fileChooser=new JFileChooser();
             fileChooser.setDialogTitle("Сохранение...");
             fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            if(LAST_FOLDER_USED!=null){
-                fileChooser.setCurrentDirectory(new File(LAST_FOLDER_USED));}
+            if(base.getLAST_FOLDER_USED()!=null){
+                fileChooser.setCurrentDirectory(new File(base.getLAST_FOLDER_USED()));}
             if (fileChooser.showSaveDialog(GUI.this) == JFileChooser.APPROVE_OPTION) {
                 File folder = fileChooser.getSelectedFile();
 
-                SaveToFile(folder,AcceptUser());
+                if(base.SaveToFile(folder)){
+                    System.out.println("Saved successfully");
+                }
+                else{
+                    JOptionPane.showMessageDialog(GUI.this, "Saving error");
+                }
             }
             else{
                 JOptionPane.showMessageDialog(GUI.this, "Сохранение отменено");
             }
+           }else{
+               File folder=new File("");
+               if(base.SaveToFile(folder)){
+                   System.out.println("Saved successfully");
+               }
+               else{
+                   JOptionPane.showMessageDialog(GUI.this, "Saving error");
+               }
+           }
         }
     };
 
 
-    private String CreateStringToWriter(User user){
-        String allData="";
-        Integer id=user.GetId();
-        allData+=id.toString();
-        allData+=" ";
-        if(user.GetName()!="isEmpty"){
-            allData+=user.GetName();
-            allData+=" ";
+    Action openAction=new AbstractAction("Открыть") {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            isOpen=true;
+            JFileChooser fileChooser=new JFileChooser();
+            fileChooser.setDialogTitle("Открытие...");
+            fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+            if(base.getLAST_FOLDER_USED()!=null){
+                fileChooser.setCurrentDirectory(new File(base.getLAST_FOLDER_USED()));}
+            if (fileChooser.showOpenDialog(GUI.this) == JFileChooser.OPEN_DIALOG) {
+                File file = fileChooser.getSelectedFile();
+               if(base.ReadFromFile(file)){
+                   System.out.println("Open successfully");
+               }
+               else{
+                    System.out.println("Opening error");
+               }
+            } else{
+                JOptionPane.showMessageDialog(GUI.this, "Открытие отменено");
+            }
         }
-        if(user.GetSurname()!="isEmpty"){
-            allData+=user.GetSurname();
-            allData+=" ";
-        }
-        if(user.GetEmail()!="isEmpty"){
-            allData+=user.GetEmail();
-            allData+=" ";
-        }
-        if(user.GetPhoneNumber1()!="isEmpty"){
-            allData+=user.GetPhoneNumber1();
-            allData+=" ";
-        }
-        if(user.GetPhoneNumber2()!="isEmpty"){
-            allData+=user.GetPhoneNumber2();
-            allData+=" ";
-        }
-        if(user.GetPhoneNumber3()!="isEmpty"){
-            allData+=user.GetPhoneNumber3();
-            allData+=" ";
-        }
-        if(user.GetRole1()!="isEmpty"){
-            allData+=user.GetRole1();
-            allData+=" ";
-        }
-        if(user.GetRole2()!="isEmpty"){
-            allData+=user.GetRole2();
-            allData+=" ";
-        }
-        if(user.GetRole3()!="isEmpty"){
-            allData+=user.GetRole3();
-            allData+=" ";
-        }
-        return allData;
-    }
+    };
 
-
-
-    private void SaveToFile(File selectedDir,User user) {
-        LAST_FOLDER_USED=selectedDir.getAbsolutePath();
-        Date NameOfFile = new Date();
-        SimpleDateFormat FormatOfDate_Name = new SimpleDateFormat("yyyyMMddHHmmss");
-        String name = FormatOfDate_Name.format(NameOfFile) + ".txt";
-        File file=new File(LAST_FOLDER_USED+'/'+name);
-        try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-            writer.write(CreateStringToWriter(user));
-            writer.close();
-        } catch (IOException exception) {
-            JOptionPane.showMessageDialog(GUI.this, "Ошибка сохранения");
-
-        }
-    }
 
 
 

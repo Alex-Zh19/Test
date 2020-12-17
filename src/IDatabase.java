@@ -1,3 +1,4 @@
+import java.io.File;
 import java.util.ArrayList;
 
 public interface IDatabase {
@@ -7,5 +8,8 @@ public interface IDatabase {
      boolean Edit(int id,User User);
      void Show();
      boolean Delete(int id);
-
+     String getLAST_FOLDER_USED();
+     void setLAST_FOLDER_USED(String path);
+     boolean SaveToFile(File selectedDir);
+     boolean ReadFromFile(File selectedDir);
 }
