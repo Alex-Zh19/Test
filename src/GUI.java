@@ -330,6 +330,9 @@ private void SetUserToFields(User user){
                    dopfields.add(createTextField("Role "+countRole,role3));
                    break;
                }
+               default:{
+                   System.out.println("Can't add");;
+               }
 
             }
             countRole++;
@@ -376,10 +379,12 @@ private void SetUserToFields(User user){
         public void actionPerformed(ActionEvent actionEvent) {
             if(findID.isSelected()){
                Integer id=Integer.parseInt(idFindField.getText());
+               if(base.GetWithId(id)!=null){
                 saveId=base.GetWithId(id).GetId();
                 SetUserToFields(base.GetWithId(id));
                 base.GetWithId(id).println();
                 isAllowedToEditAndDelete=true;
+               }
             }
             else{
                 ArrayList<User>users=base.Get(AcceptUser());
@@ -412,7 +417,6 @@ private void SetUserToFields(User user){
                     System.out.println("Changes accepted");
                 } else {
                     System.out.println("Changes not accepted ");
-                    ;
                 }
             }else{
                 System.out.println("Select user");

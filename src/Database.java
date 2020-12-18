@@ -13,8 +13,9 @@ public class Database implements IDatabase {
     final String IS_EMPTY="isEmpty";
 @Override
     public boolean Add(User user){
-    if(!UserFieldsIsEmpty(user)&&CheckEmail(user.GetEmail())&& CheckPhoneNumber(user.GetPhoneNumber1())
-            &&CheckPhoneNumber(user.GetPhoneNumber2())&&CheckPhoneNumber(user.GetPhoneNumber3())){
+    if(!UserFieldsIsEmpty(user)&&CheckPhonesInOneUser(user)&&CheckEmail(user.GetEmail())&&
+            CheckPhoneNumber(user.GetPhoneNumber1()) &&CheckPhoneNumber(user.GetPhoneNumber2())
+            &&CheckPhoneNumber(user.GetPhoneNumber3())){
             user.SetID(database.size());
             database.add(user);
          return true;
@@ -23,7 +24,10 @@ public class Database implements IDatabase {
     }
 @Override
     public User GetWithId(int ID){
-        return database.get(ID);
+    if(ID<0||ID>database.size()-1){
+        return null;
+    }
+    return database.get(ID);
     }
 @Override
     public ArrayList<User> Get(User user){
@@ -33,9 +37,8 @@ public class Database implements IDatabase {
 
     @Override
     public boolean Edit(int id,User user){
-        if(!UserFieldsIsEmpty(user)&&
-                CheckUniqueEmail(user,id)&&
-                CheckEmail(user.GetEmail())&&CheckPhoneNumberWhileEditing(user.GetPhoneNumber1(),id)
+        if(!UserFieldsIsEmpty(user)&&CheckPhonesInOneUser(user)&&
+                CheckEmailWhileEdit(user.GetEmail(),id)&&CheckPhoneNumberWhileEditing(user.GetPhoneNumber1(),id)
                 && CheckPhoneNumberWhileEditing(user.GetPhoneNumber2(),id)
                 && CheckPhoneNumberWhileEditing(user.GetPhoneNumber3(),id)){
             User oldOne=database.get(id);
@@ -289,6 +292,20 @@ for(String str:data){
         return allData;
     }
 
+    private boolean CheckPhonesInOneUser(User us){
+    String number1=us.GetPhoneNumber1();
+    String number2=us.GetPhoneNumber2();
+    String number3=us.GetPhoneNumber3();
+    if(number1.equals(number2)||number1.equals(number3)){
+        return false;
+    }
+   if(number2==IS_EMPTY&&number3==IS_EMPTY){
+      return true;
+   }else if(number2.equals(number3)){
+            return false;
+        }
+   return true;
+    }
 
     private boolean CheckEmail(String dataEmail){
         if(dataEmail!=IS_EMPTY){
@@ -307,7 +324,32 @@ for(String str:data){
                 return false;
             }
         }
-        return true;
+        return false;
+    }
+
+    private boolean CheckEmailWhileEdit(String dataEmail,int id){
+        if(dataEmail!=IS_EMPTY){
+            for(int i=0;i<database.size();++i){
+                   if(i==id){
+                       continue;
+                   }
+                   if(dataEmail.equals(database.get(i).GetEmail())){
+                       System.out.println("exit1");
+                        return false;
+                   }
+            }
+
+            int dogy=dataEmail.indexOf('@');
+            int dot=dataEmail.indexOf('.');
+            if(dot>dogy+1&&dogy!=0&&dot!=0&&dogy!=dataEmail.length()-1&&dot!=dataEmail.length()-1){
+                return true;
+            }else{
+                System.out.println("exit2");
+                return false;
+            }
+        }
+        System.out.println("exit3");
+        return false;
     }
 
     private boolean CheckPhoneNumber(String dataNum){
@@ -352,7 +394,6 @@ for(String str:data){
                 return true;
             }
             else{
-
                 return false;
             }
         }
@@ -360,21 +401,6 @@ for(String str:data){
         return true;
     }
 
-    private boolean CheckUniqueEmail(User user,int id){
-        if(database.size()==0){
-            return true;
-        }
-            for(int i=0;i<database.size();++i){
-                if(i==id){
-                    continue;
-                }
-                if(user.GetEmail().equals(database.get(i).GetEmail())){
-                    return false;
-                }
-            }
-
-        return true;
-    }
     private boolean UserFieldsIsEmpty(User user){
         if(user.GetName()==IS_EMPTY||user.GetSurname()==IS_EMPTY||user.GetEmail()==IS_EMPTY||user.GetRole1()==IS_EMPTY||
                 user.GetPhoneNumber1()==IS_EMPTY){
@@ -556,19 +582,54 @@ private ArrayList<User>CheckRoles(ArrayList<User>Similar,User user){
         return Similar;
      }
      ArrayList<User>mostSimilar=new ArrayList<>();
-     String role1= user.GetRole1();
-     String role2= user.GetRole2();
-     String role3= user.GetRole3();
-     for(int i=0;i<database.size();++i){
-         if(database.get(i).GetRole1().equals(role1)||database.get(i).GetRole1().equals(role2)||
-                 database.get(i).GetRole1().equals(role3)||
-                 database.get(i).GetRole2().equals(role1)||database.get(i).GetRole2().equals(role2)||
-                 database.get(i).GetRole2().equals(role3)||
-                 database.get(i).GetRole3().equals(role1)||database.get(i).GetRole3().equals(role2)||
-                 database.get(i).GetRole3().equals(role3)){
-             mostSimilar.add(database.get(i));
+     String role_1= user.GetRole1();
+     String role_2= user.GetRole2();
+     String role_3= user.GetRole3();
+     String [] roles_={role_1,role_2,role_3};
+     ArrayList<String>finalRoles=new ArrayList<>();
+     for (String str:roles_){
+         if(str!=IS_EMPTY){
+            finalRoles.add(str);
          }
      }
+    if(finalRoles.size()==0){
+        return null;
+    }
+switch (finalRoles.size()){
+    case 1:{
+        for(int i=0;i<database.size();++i){
+        if(database.get(i).GetRole1().equals(finalRoles.get(0))||database.get(i).GetRole2().equals(finalRoles.get(0))||
+                database.get(i).GetRole3().equals(finalRoles.get(0))){
+            mostSimilar.add(database.get(i));
+         }
+        }
+        break;
+    }
+    case 2:{
+        for(int i=0;i<database.size();++i){
+            if(database.get(i).GetRole1().equals(finalRoles.get(0))||database.get(i).GetRole2().equals(finalRoles.get(0))||
+                    database.get(i).GetRole3().equals(finalRoles.get(0))||database.get(i).GetRole1().equals(finalRoles.get(1))||
+                    database.get(i).GetRole2().equals(finalRoles.get(1))||
+                    database.get(i).GetRole3().equals(finalRoles.get(1))){
+                mostSimilar.add(database.get(i));
+            }
+        }
+        break;
+    }
+    case 3:{
+        for(int i=0;i<database.size();++i){
+            if(database.get(i).GetRole1().equals(finalRoles.get(0))||database.get(i).GetRole2().equals(finalRoles.get(0))||
+                    database.get(i).GetRole3().equals(finalRoles.get(0))||database.get(i).GetRole1().equals(finalRoles.get(1))||
+                    database.get(i).GetRole2().equals(finalRoles.get(1))||
+                    database.get(i).GetRole3().equals(finalRoles.get(1))||database.get(i).GetRole1().equals(finalRoles.get(2))||
+                    database.get(i).GetRole2().equals(finalRoles.get(2))||
+                    database.get(i).GetRole3().equals(finalRoles.get(2))){
+                mostSimilar.add(database.get(i));
+            }
+        }
+        break;
+     }
+    }
 
      if(mostSimilar.size()!=0){
        return CheckRoles(mostSimilar,user);
