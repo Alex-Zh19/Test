@@ -197,6 +197,7 @@ public class GUI extends JFrame {
             }
            }else{
                File folder=new File("");
+               isOpen=false;
                if(base.SaveToFile(folder)){
                    System.out.println("Saved successfully");
                }

@@ -13,10 +13,8 @@ public class Database implements IDatabase {
     final String IS_EMPTY="isEmpty";
 @Override
     public boolean Add(User user){
-    if(!UserFieldsIsEmpty(user)&&CheckUniqueEmail(user)&&CheckUniquePhoneNum1(user)&&
-        CheckUniquePhoneNum2(user)&&CheckUniquePhoneNum3(user)&&
-                CheckEmail(user.GetEmail())&&CheckPhoneNumber(user.GetPhoneNumber1())&&
-                CheckPhoneNumber(user.GetPhoneNumber2())&&CheckPhoneNumber(user.GetPhoneNumber3())){
+    if(!UserFieldsIsEmpty(user)&&CheckEmail(user.GetEmail())&& CheckPhoneNumber(user.GetPhoneNumber1())
+            &&CheckPhoneNumber(user.GetPhoneNumber2())&&CheckPhoneNumber(user.GetPhoneNumber3())){
             user.SetID(database.size());
             database.add(user);
          return true;
@@ -36,10 +34,10 @@ public class Database implements IDatabase {
     @Override
     public boolean Edit(int id,User user){
         if(!UserFieldsIsEmpty(user)&&
-                CheckUniqueEmail(user,id)&&CheckUniquePhoneNum1(user,id)&&
-                CheckUniquePhoneNum2(user,id)&&CheckUniquePhoneNum3(user,id)&&
-                CheckEmail(user.GetEmail())&&CheckPhoneNumber(user.GetPhoneNumber1())&&
-                CheckPhoneNumber(user.GetPhoneNumber2())&&CheckPhoneNumber(user.GetPhoneNumber3())){
+                CheckUniqueEmail(user,id)&&
+                CheckEmail(user.GetEmail())&&CheckPhoneNumberWhileEditing(user.GetPhoneNumber1(),id)
+                && CheckPhoneNumberWhileEditing(user.GetPhoneNumber2(),id)
+                && CheckPhoneNumberWhileEditing(user.GetPhoneNumber3(),id)){
             User oldOne=database.get(id);
             oldOne.SetName(user.GetName());
             oldOne.SetSurname(user.GetSurname());
@@ -136,49 +134,114 @@ for(String str:data){
     private User SplitStringToCreateUser(String str){
     User user=new User();
     String[]strings=str.split(" ");
-    int h=1;
-    user.SetName(strings[h]);
-    h++;
-    user.SetSurname(strings[h]);
-    h++;
-    if(CheckEmail(strings[h])){
-        user.SetEmail(strings[h]);
-        ++h;
-    }
-    if(CheckPhoneNumber(strings[h])){
-        user.SetPhoneNumber1(strings[h]);
-        ++h;
-    }
-    if(CheckPhoneNumber(strings[h])){
-            user.SetPhoneNumber2(strings[h]);
-            ++h;
-    }else{
-        user.SetPhoneNumber2(IS_EMPTY);
-    }
-    if(CheckPhoneNumber(strings[h])){
-            user.SetPhoneNumber3(strings[h]);
-            ++h;
-    }
-    else{
-        user.SetPhoneNumber3(IS_EMPTY);
-    }
-    user.SetRole1(strings[h]);
-    if(h!=strings.length-1){
-        ++h;
-        user.SetRole2(strings[h]);
+    int start=0,end=0;
 
-        if(h!=strings.length-1){
-            ++h;
-            user.SetRole3(strings[h]);
-        }else{
-            user.SetRole3(IS_EMPTY);
+
+    for(int i=0;i<strings.length;++i){
+        if(strings[i].equals("Name:")){
+            start=i+1;
+        }
+        if(strings[i].equals("Surname:")){
+            end=i;
         }
     }
-    else{
-        user.SetRole2(IS_EMPTY);
-        user.SetRole3(IS_EMPTY);
+    String name="";//name
+    for(int i=start;i<end;++i){
+       name+=strings[i];
+       if(end-i>1){
+           name+=" ";
+       }
     }
-    return user;
+    user.SetName(name);
+    start=end+1;
+    for(int i=start;i<strings.length;++i){
+        if(strings[i].equals("Email:")){
+            end=i;
+        }
+    }
+    String surname="";//surname
+        for(int i=start;i<end;++i){
+            surname+=strings[i];
+            if(end-i>1){
+                surname+=" ";
+            }
+        }
+    user.SetSurname(surname);
+        start=end+1;
+        for(int i=start;i<strings.length;++i){
+            if(strings[i].equals("PhoneNumbers:")){
+                end=i;
+            }
+        }
+        String email="";//email
+        for(int i=start;i<end;++i){
+            email+=strings[i];
+        }
+        user.SetEmail(email);
+        start=end+1;
+
+        for(int i=start;i<strings.length;++i){
+            if(strings[i].equals("Roles:")){
+                end=i;
+            }
+        }
+        String number1="";//phone num
+        String number2="";
+        String number3="";
+       switch (end-start){
+           case 1:{
+               number1=strings[start];
+               number2=IS_EMPTY;
+               number3=IS_EMPTY;
+               break;
+           }
+           case 2:{
+               number1=strings[start];
+               number2=strings[start+1];
+               number3=IS_EMPTY;
+               break;
+           }
+           case 3:{
+               number1=strings[start];
+               number2=strings[start+1];
+               number3=strings[start+2];
+               break;
+           }
+       }
+       user.SetPhoneNumber1(number1);
+        user.SetPhoneNumber2(number2);
+        user.SetPhoneNumber3(number3);
+
+
+        start=end+1;
+        end=strings.length;
+        String role1="";//roles
+        String role2="";
+        String role3="";
+        switch (end-start){
+            case 1:{
+                role1=strings[start];
+                role2=IS_EMPTY;
+                role3=IS_EMPTY;
+                break;
+            }
+            case 2:{
+                role1=strings[start];
+                role2=strings[start+1];
+                role3=IS_EMPTY;
+                break;
+            }
+            case 3:{
+                role1=strings[start];
+                role2=strings[start+1];
+                role3=strings[start+2];
+                break;
+            }
+        }
+        user.SetRole1(role1);
+        user.SetRole2(role2);
+        user.SetRole3(role3);
+     return user;
     }
 
     public String getLAST_FOLDER_USED() {
@@ -194,12 +257,16 @@ for(String str:data){
         Integer id=user.GetId();
         allData+=id.toString();
         allData+=" ";
+        allData+="Name: ";
             allData+=user.GetName();
             allData+=" ";
+        allData+="Surname: ";
             allData+=user.GetSurname();
             allData+=" ";
+        allData+="Email: ";
             allData+=user.GetEmail();
             allData+=" ";
+        allData+="PhoneNumbers: ";
             allData+=user.GetPhoneNumber1();
             allData+=" ";
             if(user.GetPhoneNumber2()!=IS_EMPTY){
@@ -208,6 +275,7 @@ for(String str:data){
         if(user.GetPhoneNumber3()!=IS_EMPTY){
             allData+=user.GetPhoneNumber3();
             allData+=" ";}
+        allData+="Roles: ";
             allData+=user.GetRole1();
             allData+=" ";
         if(user.GetRole2()!=IS_EMPTY) {
@@ -222,54 +290,73 @@ for(String str:data){
     }
 
 
-    private boolean CheckUniqueEmail(User user){
-    if(database.size()==0){
-        return true;
-    }
-    for(int i=0;i<database.size();++i){
-        if(user.GetEmail().equals(database.get(i).GetEmail())){
-          return false;
-        }
-      }
-
-      return true;
-}
-    private boolean CheckUniquePhoneNum1(User user){
-        if(database.size()==0){
-            return true;
-        }
-           for (int i = 0; i < database.size(); ++i) {
-               if (user.GetPhoneNumber1().equals(database.get(i).GetPhoneNumber1())) {
-                   return false;
-               }
-           }
-
-        return true;
-    }
-    private boolean CheckUniquePhoneNum2(User user){
-        if(database.size()==0){
-            return true;
-        }
-        if(user.GetPhoneNumber2()!=IS_EMPTY){
+    private boolean CheckEmail(String dataEmail){
+        if(dataEmail!=IS_EMPTY){
+            if(database.size()!=0){
             for(int i=0;i<database.size();++i){
-                if(user.GetPhoneNumber2().equals(database.get(i).GetPhoneNumber2())){
+                if(dataEmail.equals(database.get(i).GetEmail())){
                     return false;
                 }
+            }
+            }
+            int dogy=dataEmail.indexOf('@');
+            int dot=dataEmail.indexOf('.');
+            if(dot>dogy+1&&dogy!=0&&dot!=0&&dogy!=dataEmail.length()-1&&dot!=dataEmail.length()-1){
+                return true;
+            }else{
+                return false;
             }
         }
         return true;
     }
-    private boolean CheckUniquePhoneNum3(User user){
-        if(database.size()==0){
-            return true;
-        }
-        if(user.GetPhoneNumber2()!=IS_EMPTY) {
-            for (int i = 0; i < database.size(); ++i) {
-                if (user.GetPhoneNumber3().equals(database.get(i).GetPhoneNumber3())) {
-                    return false;
+
+    private boolean CheckPhoneNumber(String dataNum){
+        if(dataNum!=IS_EMPTY) {
+            if(database.size()!=0){
+                for (int i = 0; i < database.size(); ++i) {
+                    if (dataNum.equals(database.get(i).GetPhoneNumber1())||
+                            dataNum.equals(database.get(i).GetPhoneNumber2())||
+                            dataNum.equals(database.get(i).GetPhoneNumber3())) {
+                        return false;
+                    }
                 }
             }
+            String firstNum = dataNum.substring(0, 3);
+            if (firstNum.equals("375") && dataNum.length() == 12) {
+                return true;
+            }
+            else{
+                return false;
+            }
         }
+        return true;
+    }
+
+    private boolean CheckPhoneNumberWhileEditing(String dataNum,int id){
+        if(dataNum!=IS_EMPTY) {
+            if(database.size()!=0){
+                    for (int i = 0;i<database.size();++i){
+                        if(i==id){
+                            continue;
+                        }
+                        if (dataNum.equals(database.get(i).GetPhoneNumber1())||
+                                dataNum.equals(database.get(i).GetPhoneNumber2())||
+                                dataNum.equals(database.get(i).GetPhoneNumber3())) {
+                            return false;
+                        }
+                    }
+
+            }
+            String firstNum = dataNum.substring(0, 3);
+            if (firstNum.equals("375") && dataNum.length() == 12) {
+                return true;
+            }
+            else{
+
+                return false;
+            }
+        }
+
         return true;
     }
 
@@ -288,58 +375,12 @@ for(String str:data){
 
         return true;
     }
-    private boolean CheckUniquePhoneNum1(User user,int id){
-        if(database.size()==0){
-            return true;
-        }
-            for (int i = 0;i<database.size();++i){
-                if(i==id){
-                    continue;
-                }
-                if (user.GetPhoneNumber1().equals(database.get(i).GetPhoneNumber1())) {
-                    return false;
-                }
-            }
-        return true;
-    }
-    private boolean CheckUniquePhoneNum2(User user,int id){
-        if(database.size()==0){
-            return true;
-        }
-        if(user.GetPhoneNumber2()!=IS_EMPTY){
-            for(int i=0;i<database.size();++i){
-                if(i==id){
-                    continue;
-                }
-                if(user.GetPhoneNumber2().equals(database.get(i).GetPhoneNumber2())){
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-    private boolean CheckUniquePhoneNum3(User user,int id){
-        if(database.size()==0){
-            return true;
-        }
-        if(user.GetPhoneNumber3()!=IS_EMPTY){
-            for(int i=0;i<database.size();++i){
-                if(i==id){
-                    continue;
-                }
-                if(user.GetPhoneNumber3().equals(database.get(i).GetPhoneNumber3())){
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
     private boolean UserFieldsIsEmpty(User user){
         if(user.GetName()==IS_EMPTY||user.GetSurname()==IS_EMPTY||user.GetEmail()==IS_EMPTY||user.GetRole1()==IS_EMPTY||
                 user.GetPhoneNumber1()==IS_EMPTY){
             return true;
         }
+
         return false;
     }
 
@@ -536,31 +577,9 @@ private ArrayList<User>CheckRoles(ArrayList<User>Similar,User user){
     }
 
 
-    private boolean CheckPhoneNumber(String dataNum){
-        if(dataNum!=IS_EMPTY) {
-            String firstNum = dataNum.substring(0, 3);
-            if (firstNum.equals("375") && dataNum.length() == 12) {
-                return true;
-            }
-            else{
-                return false;
-            }
-        }
-       return true;
-    }
 
-    private boolean CheckEmail(String dataEmail){
-        if(dataEmail!=IS_EMPTY){
-            int dogy=dataEmail.indexOf('@');
-            int dot=dataEmail.indexOf('.');
-            if(dot>dogy+1&&dogy!=0&&dot!=0&&dogy!=dataEmail.length()-1&&dot!=dataEmail.length()-1){
-                return true;
-            }else{
-                return false;
-            }
-        }
-        return true;
-    }
+
+
 
 
 
