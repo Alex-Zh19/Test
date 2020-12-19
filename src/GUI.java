@@ -112,7 +112,7 @@ public class GUI extends JFrame {
 
         JMenuBar menu = new JMenuBar();
         setJMenuBar(menu);
-        JMenu fileMenu = new JMenu("Файл");
+        JMenu fileMenu = new JMenu("File");
         menu.add(fileMenu);
         
         saveMenuItem = fileMenu.add(saveAction);
@@ -170,7 +170,7 @@ public class GUI extends JFrame {
  }
 
 
-    Action saveAction = new AbstractAction("Сохранить") {
+    Action saveAction = new AbstractAction("Save") {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
            if(isOpen){
@@ -189,11 +189,11 @@ public class GUI extends JFrame {
         }
     };
 
-    Action saveAsAction = new AbstractAction("Сохранить как") {
+    Action saveAsAction = new AbstractAction("Save As") {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
                 JFileChooser fileChooser=new JFileChooser();
-                fileChooser.setDialogTitle("Сохранение...");
+                fileChooser.setDialogTitle("Saving...");
                 fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
                 if(base.getLAST_FOLDER_USED()!=null){
                     fileChooser.setCurrentDirectory(new File(base.getLAST_FOLDER_USED()));}
@@ -207,18 +207,18 @@ public class GUI extends JFrame {
                     }
                 }
                 else{
-                    JOptionPane.showMessageDialog(GUI.this, "Сохранение отменено");
+                    JOptionPane.showMessageDialog(GUI.this, "Saving canceled");
                 }
             }
 
     };
 
-    Action openAction=new AbstractAction("Открыть") {
+    Action openAction=new AbstractAction("Open") {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
             isOpen=true;
             JFileChooser fileChooser=new JFileChooser();
-            fileChooser.setDialogTitle("Открытие...");
+            fileChooser.setDialogTitle("Opening...");
             fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
             if(base.getLAST_FOLDER_USED()!=null){
                 fileChooser.setCurrentDirectory(new File(base.getLAST_FOLDER_USED()));}
@@ -231,7 +231,7 @@ public class GUI extends JFrame {
                     System.out.println("Opening error");
                }
             } else{
-                JOptionPane.showMessageDialog(GUI.this, "Открытие отменено");
+                JOptionPane.showMessageDialog(GUI.this, "opening canceled");
             }
         }
     };
