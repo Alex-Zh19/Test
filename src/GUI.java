@@ -4,14 +4,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.io.BufferedWriter;
+import java.awt.image.RescaleOp;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
 public class GUI extends JFrame {
@@ -39,6 +34,7 @@ public class GUI extends JFrame {
 
     private JMenuItem saveMenuItem;
     private JMenuItem openMenuItem;
+    private JMenuItem saveAsMenuItem;
 
     private JCheckBox findID=new JCheckBox();
     IDatabase base=new Database();
@@ -121,6 +117,7 @@ public class GUI extends JFrame {
         
         saveMenuItem = fileMenu.add(saveAction);
         openMenuItem=fileMenu.add(openAction);
+        saveAsMenuItem=fileMenu.add(saveAsAction);
 
        add(TextBox, BorderLayout.WEST);
        add(ButtonPlusBox,BorderLayout.EAST);
@@ -176,26 +173,7 @@ public class GUI extends JFrame {
     Action saveAction = new AbstractAction("Сохранить") {
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-           if(!isOpen){
-            JFileChooser fileChooser=new JFileChooser();
-            fileChooser.setDialogTitle("Сохранение...");
-            fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            if(base.getLAST_FOLDER_USED()!=null){
-                fileChooser.setCurrentDirectory(new File(base.getLAST_FOLDER_USED()));}
-            if (fileChooser.showSaveDialog(GUI.this) == JFileChooser.APPROVE_OPTION) {
-                File folder = fileChooser.getSelectedFile();
-
-                if(base.SaveToFile(folder)){
-                    System.out.println("Saved successfully");
-                }
-                else{
-                    JOptionPane.showMessageDialog(GUI.this, "Saving error");
-                }
-            }
-            else{
-                JOptionPane.showMessageDialog(GUI.this, "Сохранение отменено");
-            }
-           }else{
+           if(isOpen){
                File folder=new File("");
                isOpen=false;
                if(base.SaveToFile(folder)){
@@ -205,9 +183,35 @@ public class GUI extends JFrame {
                    JOptionPane.showMessageDialog(GUI.this, "Saving error");
                }
            }
+           else{
+              saveAsAction.actionPerformed(actionEvent);
+           }
         }
     };
 
+    Action saveAsAction = new AbstractAction("Сохранить как") {
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+                JFileChooser fileChooser=new JFileChooser();
+                fileChooser.setDialogTitle("Сохранение...");
+                fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                if(base.getLAST_FOLDER_USED()!=null){
+                    fileChooser.setCurrentDirectory(new File(base.getLAST_FOLDER_USED()));}
+                if (fileChooser.showSaveDialog(GUI.this) == JFileChooser.APPROVE_OPTION) {
+                    File folder = fileChooser.getSelectedFile();
+                    if(base.SaveToFile(folder)){
+                        System.out.println("Saved successfully");
+                    }
+                    else{
+                        JOptionPane.showMessageDialog(GUI.this, "Saving error");
+                    }
+                }
+                else{
+                    JOptionPane.showMessageDialog(GUI.this, "Сохранение отменено");
+                }
+            }
+
+    };
 
     Action openAction=new AbstractAction("Открыть") {
         @Override
@@ -381,6 +385,7 @@ private void SetUserToFields(User user){
                Integer id=Integer.parseInt(idFindField.getText());
                if(base.GetWithId(id)!=null){
                 saveId=base.GetWithId(id).GetId();
+                Reset();
                 SetUserToFields(base.GetWithId(id));
                 base.GetWithId(id).println();
                 isAllowedToEditAndDelete=true;
@@ -391,6 +396,7 @@ private void SetUserToFields(User user){
                 if(users!=null&&users.size()!=0){
                   if(users.size()==1){
                       isAllowedToEditAndDelete=true;
+                      Reset();
                      SetUserToFields(users.get(0));
                      saveId=users.get(0).GetId();
                       for(User us:users){

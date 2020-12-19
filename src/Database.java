@@ -11,7 +11,19 @@ public class Database implements IDatabase {
     boolean isOpen=false;
     String openFileName="openFileName";
     final String IS_EMPTY="isEmpty";
-@Override
+
+     @Override
+    public String getLAST_FOLDER_USED() {
+        return LAST_FOLDER_USED;
+    }
+
+     @Override
+    public void setLAST_FOLDER_USED(String path){
+        LAST_FOLDER_USED=path;
+    }
+
+
+     @Override
     public boolean Add(User user){
     if(!UserFieldsIsEmpty(user)&&CheckPhonesInOneUser(user)&&CheckEmail(user.GetEmail())&&
             CheckPhoneNumber(user.GetPhoneNumber1()) &&CheckPhoneNumber(user.GetPhoneNumber2())
@@ -22,6 +34,7 @@ public class Database implements IDatabase {
         }
          return false;
     }
+
 @Override
     public User GetWithId(int ID){
     if(ID<0||ID>database.size()-1){
@@ -29,6 +42,7 @@ public class Database implements IDatabase {
     }
     return database.get(ID);
     }
+
 @Override
     public ArrayList<User> Get(User user){
         ArrayList<User> Get= FindMostSimilar(database,user);
@@ -76,15 +90,11 @@ public class Database implements IDatabase {
     return false;
     }
 
-
-
-
-
 @Override
     public boolean SaveToFile(File selectedDir) {
         LAST_FOLDER_USED=selectedDir.getAbsolutePath();
-    String name;
-    File file;
+        String name;
+        File file;
         if(!isOpen){
         Date NameOfFile = new Date();
         SimpleDateFormat FormatOfDate_Name = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -133,6 +143,9 @@ for(String str:data){
     }
     return true;
     }
+
+
+
 
     private User SplitStringToCreateUser(String str){
     User user=new User();
@@ -247,14 +260,6 @@ for(String str:data){
      return user;
     }
 
-    public String getLAST_FOLDER_USED() {
-        return LAST_FOLDER_USED;
-    }
-
-    public void setLAST_FOLDER_USED(String path){
-        LAST_FOLDER_USED=path;
-    }
-
     private String CreateStringToWriter(User user){
         String allData="";
         Integer id=user.GetId();
@@ -296,61 +301,39 @@ for(String str:data){
     String number1=us.GetPhoneNumber1();
     String number2=us.GetPhoneNumber2();
     String number3=us.GetPhoneNumber3();
-    if(number1.equals(number2)||number1.equals(number3)){
+      if(number1.equals(number2)||number1.equals(number3)){
         return false;
+      }
+      if(number2==IS_EMPTY&&number3==IS_EMPTY){
+            return true;
+      }else if(number2.equals(number3)){
+              return false;
+            }
+       return true;
     }
-   if(number2==IS_EMPTY&&number3==IS_EMPTY){
-      return true;
-   }else if(number2.equals(number3)){
-            return false;
-        }
-   return true;
-    }
+
 
     private boolean CheckEmail(String dataEmail){
         if(dataEmail!=IS_EMPTY){
             if(database.size()!=0){
-            for(int i=0;i<database.size();++i){
+              for(int i=0;i<database.size();++i){
                 if(dataEmail.equals(database.get(i).GetEmail())){
                     return false;
                 }
-            }
+              }
             }
             int dogy=dataEmail.indexOf('@');
             int dot=dataEmail.indexOf('.');
-            if(dot>dogy+1&&dogy!=0&&dot!=0&&dogy!=dataEmail.length()-1&&dot!=dataEmail.length()-1){
+             if(dot>dogy+1&&dogy!=0&&dot!=0&&dogy!=dataEmail.length()-1&&dot!=dataEmail.length()-1){
                 return true;
-            }else{
+             }else{
                 return false;
-            }
+             }
         }
         return false;
     }
 
-    private boolean CheckEmailWhileEdit(String dataEmail,int id){
-        if(dataEmail!=IS_EMPTY){
-            for(int i=0;i<database.size();++i){
-                   if(i==id){
-                       continue;
-                   }
-                   if(dataEmail.equals(database.get(i).GetEmail())){
-                       System.out.println("exit1");
-                        return false;
-                   }
-            }
 
-            int dogy=dataEmail.indexOf('@');
-            int dot=dataEmail.indexOf('.');
-            if(dot>dogy+1&&dogy!=0&&dot!=0&&dogy!=dataEmail.length()-1&&dot!=dataEmail.length()-1){
-                return true;
-            }else{
-                System.out.println("exit2");
-                return false;
-            }
-        }
-        System.out.println("exit3");
-        return false;
-    }
 
     private boolean CheckPhoneNumber(String dataNum){
         if(dataNum!=IS_EMPTY) {
@@ -374,6 +357,28 @@ for(String str:data){
         return true;
     }
 
+    private boolean CheckEmailWhileEdit(String dataEmail,int id){
+        if(dataEmail!=IS_EMPTY){
+            for(int i=0;i<database.size();++i){
+                   if(i==id){
+                       continue;
+                   }
+                   if(dataEmail.equals(database.get(i).GetEmail())){
+                        return false;
+                   }
+            }
+            int dogy=dataEmail.indexOf('@');
+            int dot=dataEmail.indexOf('.');
+            if(dot>dogy+1&&dogy!=0&&dot!=0&&dogy!=dataEmail.length()-1&&dot!=dataEmail.length()-1){
+                return true;
+            }else{
+                return false;
+            }
+        }
+        return false;
+    }
+
+
     private boolean CheckPhoneNumberWhileEditing(String dataNum,int id){
         if(dataNum!=IS_EMPTY) {
             if(database.size()!=0){
@@ -387,7 +392,6 @@ for(String str:data){
                             return false;
                         }
                     }
-
             }
             String firstNum = dataNum.substring(0, 3);
             if (firstNum.equals("375") && dataNum.length() == 12) {
@@ -397,16 +401,16 @@ for(String str:data){
                 return false;
             }
         }
-
         return true;
     }
+
+
 
     private boolean UserFieldsIsEmpty(User user){
         if(user.GetName()==IS_EMPTY||user.GetSurname()==IS_EMPTY||user.GetEmail()==IS_EMPTY||user.GetRole1()==IS_EMPTY||
                 user.GetPhoneNumber1()==IS_EMPTY){
             return true;
         }
-
         return false;
     }
 
@@ -540,7 +544,6 @@ private User CheckTelephones(User user){
 }
 
 
-
 private ArrayList<User>CheckRoles(ArrayList<User>Similar,User user){
      if(Similar.size()!=0){
          String role1= user.GetRole1();
@@ -636,13 +639,6 @@ switch (finalRoles.size()){
      }
      return null;
     }
-
-
-
-
-
-
-
 
 
     private boolean CompareAllUsersParams(User user,User user2){

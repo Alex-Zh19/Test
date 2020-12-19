@@ -95,6 +95,5 @@ public class User {
             System.out.print(role3+" ");
         }
         System.out.println();
-
     }
 }
