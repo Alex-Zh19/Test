@@ -150,10 +150,10 @@ public class GUI extends JFrame {
      user2.SetSurname("Popov");
      user2.SetEmail("Popov@mail.ru");
      user2.SetPhoneNumber1("375298574896");
-     user2.SetPhoneNumber2("isEmpty");
+     user2.SetPhoneNumber2("375259633696");
      user2.SetPhoneNumber3("isEmpty");
      user2.SetRole1("Developer");
-     user2.SetRole2("isEmpty");
+     user2.SetRole2("Friend");
      user2.SetRole3("isEmpty");
      base.Add(user2);
      User user3=new User();
@@ -161,11 +161,11 @@ public class GUI extends JFrame {
      user3.SetSurname("Lubov");
      user3.SetEmail("LubovA@mail.ru");
      user3.SetPhoneNumber1("375446542918");
-     user3.SetPhoneNumber2("isEmpty");
-     user3.SetPhoneNumber3("isEmpty");
+     user3.SetPhoneNumber2("375257411474");
+     user3.SetPhoneNumber3("375298522585");
      user3.SetRole1("Trainee");
-     user3.SetRole2("isEmpty");
-     user3.SetRole3("isEmpty");
+     user3.SetRole2("Enemy");
+     user3.SetRole3("Traitor");
      base.Add(user3);
  }
 
